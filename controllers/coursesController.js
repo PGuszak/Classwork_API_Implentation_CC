@@ -114,23 +114,24 @@ module.exports = {
       });
   },
 
-  respondJSON: (req, res, next) => {
+  respondJSON: (req, res) => {
     res.json({
-      status: httpdStats.OK,
+      status: httpStatus.OK,
       data: res.locals
     });
   },
 
-  errorJSON: (error, res, next) => {
+  errorJSON: (error, req, res, next) => {
     let errorObject;
+  
     if (error) {
       errorObject = {
         status: httpStatus.INTERNAL_SERVER_ERROR,
         message: error.message
-    };
+      };
     } else {
       errorObject = {
-        status: httpStatus.OK,
+        status: httpStatus.INTERNAL_SERVER_ERROR,
         message: "Unknown Error."
       };
     }
@@ -139,7 +140,7 @@ module.exports = {
 
   filterUserCourses: (req, res, next) => {
     let currentUser = res.locals.currentUser;
-    if(currentUser) {
+    if (currentUser) {
       let mappedCourses = res.locals.courses.map((course) => {
         let userJoined = currentUser.courses.some((userCourse) => {
           return userCourse.equals(course._id);
@@ -148,7 +149,7 @@ module.exports = {
       });
       res.locals.courses = mappedCourses;
       next();
-    } else{
+    } else {
       next();
     }
   },
@@ -156,7 +157,8 @@ module.exports = {
   join: (req, res, next) => {
     let courseId = req.params.id,
       currentUser = req.user;
-    if(currentUser) {
+  
+    if (currentUser) {
       User.findByIdAndUpdate(currentUser, {
         $addToSet: {
           courses: courseId
@@ -173,5 +175,9 @@ module.exports = {
       next(new Error("User must log in."));
     }
   }
+
+
+
+
 
 };
