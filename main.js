@@ -3,7 +3,9 @@
 const express = require("express"),
   layouts = require("express-ejs-layouts"),
   app = express(),
-  router = express.Router(),
+  //router = express.Router(),
+  //should be to use the routes folder to be the line below
+  router = require("./routes/index"),
   homeController = require("./controllers/homeController"),
   errorController = require("./controllers/errorController"),
   subscribersController = require("./controllers/subscribersController.js"),
@@ -27,26 +29,26 @@ mongoose.set("useCreateIndex", true);
 app.set("port", process.env.PORT || 3000);
 app.set("view engine", "ejs");
 
-router.use(
+app.use(
   methodOverride("_method", {
     methods: ["POST", "GET"]
   })
 );
 
-router.use(express.json());
+app.use(express.json());
 
 
-router.use(layouts);
-router.use(express.static("public"));
-router.use(expressValidator());
-router.use(
+app.use(layouts);
+app.use(express.static("public"));
+app.use(expressValidator());
+app.use(
   express.urlencoded({
     extended: false
   })
 );
 
-router.use(cookieParser("secretCuisine123"));
-router.use(
+app.use(cookieParser("secretCuisine123"));
+app.use(
   expressSession({
     secret: "secretCuisine123",
     cookie: {
@@ -56,21 +58,23 @@ router.use(
     saveUninitialized: false
   })
 );
-router.use(connectFlash());
+app.use(connectFlash());
 
-router.use(passport.initialize());
-router.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-router.use((req, res, next) => {
+app.use((req, res, next) => {
   res.locals.loggedIn = req.isAuthenticated();
   res.locals.currentUser = req.user;
   res.locals.flashMessages = req.flash();
   next();
 });
 
+
+ /*
 router.get("/", homeController.index);
 
 router.get("/users", usersController.index, usersController.indexView);
@@ -119,6 +123,9 @@ router.delete("/courses/:id/delete", coursesController.delete, coursesController
 
 router.use(errorController.pageNotFoundError);
 router.use(errorController.internalServerError);
+
+
+*/
 
 app.use("/", router);
 
